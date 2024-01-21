@@ -1,0 +1,58 @@
+version: '3.9'
+
+
+
+
+services:
+  # default-app: &default-app
+  #   #image: flaks-volt-test
+  #   build:
+  #     context: "."
+  #     target: "app"
+  #     args:
+  #       - "FLASK_ENV=${FLASK_ENV:-production}"
+  #       - "NODE_ENV=${NODE_ENV:-producßtion}"
+  #   env_file:
+  #     - "production.env"
+  #     - "production_db.env"
+  #   restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+  #   stop_grace_period: "3s"
+  #   tty: true
+  #   ports:
+  #     - 16880:8000
+    
+
+  
+  # web:
+  #   <<: *default-app
+  #   container_name: flask-web    
+  #   ports:
+  #    - "8001:8000"
+    
+    
+
+  db:
+    image: mysql:8.0.25
+    restart: always
+    volumes:
+      - db_data:/var/lib/mysql
+      - "$PWD/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d"
+    env_file:
+    - "production_db.env"
+    ports:
+      - 3307:3306
+      
+  adminer:
+    image: adminer
+    restart: always
+    environment:
+      ADMINER_DEFAULT_DB_DRIVER: mysql
+      ADMINER_DEFAULT_DB_HOST: db
+      ADMINER_DEFAULT_DB_NAME: db1
+      ADMINER_DESIGN: price
+      ADMINER_PLUGINS: tables-filter tinymce edit-calendar
+    ports:
+      - 8081:8080
+
+volumes:
+  db_data: {}

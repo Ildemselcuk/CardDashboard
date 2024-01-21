@@ -1,0 +1,15 @@
+This is the summary defined in yaml file
+Create Thor license endpoint
+---
+tags:
+  - Transaction    
+
+responses:
+  200:
+    description: Successfully completed hostname and licenses will be returned
+    examples: 
+      message: 'Success'
+
+   
+  
+

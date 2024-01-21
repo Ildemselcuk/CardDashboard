@@ -1,0 +1,46 @@
+This is the summary defined in yaml file
+Create Thor license endpoint
+---
+tags:
+  - Transaction
+parameters:
+  - in: body
+    name: transaction
+    schema:
+      type: object
+      required:
+        - amount
+        - card_id
+        - description
+      properties:
+        card_id:
+          type: int
+        amount:
+          type: int
+        description:
+          type: string
+      example:
+        card_id: 3
+        amount: 550
+        description: "Test Process"
+
+  
+definitions:
+
+  Transaction:
+    type: object
+    properties:
+      card_no:
+        type: int
+      amount:
+        type: int
+      description:
+        type: string
+responses:
+  200:
+    description: Successfully completed hostname and licenses will be returned
+    schema:
+      $ref: '#/definitions/Transaction'
+   
+  
+

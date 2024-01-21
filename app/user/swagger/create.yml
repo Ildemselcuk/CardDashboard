@@ -1,0 +1,42 @@
+This is the summary defined in yaml file
+Create Thor license endpoint
+---
+tags:
+  - User
+security:
+- Bearer: []
+parameters:
+  - in: body
+    name: user
+    schema:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: password
+      example:
+        email: "test@test.com"
+        password: "test"
+
+  
+definitions:
+
+  User:
+    type: object
+    properties:
+      email:
+        type: string
+      password:
+        type: password
+responses:
+  200:
+    description: Successfully completed hostname and licenses will be returned
+    schema:
+      $ref: '#/definitions/User'
+   
+  
+

@@ -1,0 +1,14 @@
+
+Flask==3.0.0
+Flask-Migrate==4.0.5
+gunicorn==21.2.0 
+PyMySQL==1.1.0
+SQLAlchemy==2.0.24 
+Werkzeug==3.0.1 
+alembic==1.13.1 
+dependency-injector==4.41.0 
+marshmallow==3.20.1 
+marshmallow-sqlalchemy==0.29.0 
+flask-marshmallow==0.15.0 
+flasgger==0.9.7.1 
+PyJWT==2.8.0 
