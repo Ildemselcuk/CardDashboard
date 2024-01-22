@@ -88,4 +88,16 @@ class Card(db.Model):
 
 class CardSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
+        # Define the CardSchema class that automatically maps to the Card model
         model = Card
+
+
+class DeleteCardSchema(CardSchema):
+    class Meta:
+        # Inherit from CardSchema and include only the 'card_no' field
+        fields = ('card_no',)
+    
+class DetailListCardSchema(CardSchema):
+    class Meta:
+        # Inherit from CardSchema and include only the 'card_no' field
+        fields = ('label','card_no',)

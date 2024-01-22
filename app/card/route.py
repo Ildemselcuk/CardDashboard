@@ -8,10 +8,11 @@ from datetime import datetime
 # from . import blueprint
 from flasgger.utils import swag_from
 from flask import Blueprint, jsonify, request
-from app.card.models import CardSchema
+from app.card.models import CardSchema, DeleteCardSchema, DetailListCardSchema
 from app.user.utils import token_required
 from werkzeug.exceptions import HTTPException
-# Start listening events
+
+# initialize object manager
 object_manager = Managers.object_manager()
 
 blueprint = Blueprint(
@@ -26,8 +27,8 @@ blueprint = Blueprint(
 def _list():
     try:
         result = object_manager.service.list()
-        records_serialized = CardSchema(many=True).dump(result)
-        objects = {'cards': records_serialized}
+        _serialized = CardSchema(many=True).dump(result)
+        objects = {'cards': _serialized}
         return json.dumps(objects, indent=4), 200, {'ContentType': 'application/json'}
     except Exception as e:
         raise e
@@ -40,9 +41,11 @@ def _detail_list():
             'label': request.json['label'],
             'card_no': request.json['card_no']
         }
-        services = [result._asdict()
+        _schema = DetailListCardSchema()
+        data = _schema.load(request.json)
+        cards = [result._asdict()
                     for result in object_manager.service.list()]
-        objects = {'cards': services}
+        objects = {'cards': cards}
         return json.dumps(objects, indent=4), 200, {'ContentType': 'application/json'}
     except Exception as e:
         print(e)
@@ -51,13 +54,15 @@ def _detail_list():
 @blueprint.route("/update", methods=['GET'])
 def _update():
     try:
-        data = {
-            'id': request.json['id'],
-            'label': request.json['label'],
-            'card_no': request.json['card_no'],
-            'user_id': request.json['user_id'],
-            'status': request.json['status'],
-        }
+        # data = {
+        #     'id': request.json['id'],
+        #     'label': request.json['label'],
+        #     'card_no': request.json['card_no'],
+        #     'user_id': request.json['user_id'],
+        #     'status': request.json['status'],
+        # }
+        card_schema = CardSchema()
+        data = card_schema.load(request.json)
         services = object_manager.service.update(data)
         objects = {'cards': services}
         return json.dumps(objects, indent=4), 200, {'ContentType': 'application/json'}
@@ -68,11 +73,13 @@ def _update():
 @blueprint.route("/delete", methods=['GET'])
 def _delete():
     try:
-        data = {
-            'card_no': request.json['card_no']
-        }
-        services = object_manager.service.delete(data)
-        objects = {'cards': services}
+        # data = {
+        #     'card_no': request.json['card_no']
+        # }
+        _schema = DeleteCardSchema()
+        data = _schema.load(request.json)
+        res = object_manager.service.delete(data)
+        objects = {'result': res}
         return json.dumps(objects, indent=4), 200, {'ContentType': 'application/json'}
     except Exception as e:
         print(e)
@@ -83,21 +90,10 @@ def _delete():
 @blueprint.route("/create", methods=['POST'])
 def _create():
     try:
-        # time__ = datetime.now()
-        # formatted_time = time__.strftime("%Y-%m-%d %H:%M:%S")
-        # # data'da eksiklik oldu mu hata fırlat
-        # data = {
-        #     'label': str(request.json['label']),
-        #     'card_no': str(request.json['card_no']),
-        #     'user_id': int(request.json['user_id']),
-        #     'status': str(request.json['status']),
-        #     'date_created': formatted_time,
-        #     'date_modified': formatted_time
-        # }
         card_schema = CardSchema()
         data = card_schema.load(request.json)
-        services = object_manager.service.create(data)
-        objects = {'services': services}
+        card = object_manager.service.create(data)
+        objects = {'card': card}
         return json.dumps(objects, indent=4), 200, {'ContentType': 'application/json'}
     except Exception as e:
         raise e
