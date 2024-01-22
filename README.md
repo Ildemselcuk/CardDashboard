@@ -34,15 +34,17 @@ docker-compose up db adminer -d
 python3 -m venv ./venv
 source venv/bin/activate
 python3 -m pip install -r requirements.txt
+cd app
 flask db init
 flask db migrate
 flask db upgrade
+cd ..
 python3 main.py
 ```
 
 ## Usage
 
-Access the Flask application by navigating to `http://localhost:5000` in your web browser. Perform financial transactions, add or remove cards, and manage your financial data securely.
+Access the Flask application by navigating to `http://localhost:5001` if you have run the backend locally or `http://localhost:8001` if you used docker compose, in your web browser. Perform financial transactions, add or remove cards, and manage your financial data securely.
 
 ## Contributing
 
