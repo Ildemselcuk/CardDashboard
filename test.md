@@ -1,6 +1,6 @@
 # CardDashboard
 
-CardDashboard is a simple backend application for card management, developed using Flask and Python. It allows users to manage their financial transactions, add and remove cards, list them, update card information, and securely log in or register.
+CardDashboard is a simple backend application for financial management developed using Flask and Python. It allows users to manage their financial transactions, add and remove cards, list them, update card information, and securely log in or register.
 
 ## Installation and Setup
 
@@ -31,7 +31,7 @@ Alternatively, if you prefer to run the backend locally:
 
 ```bash
 docker-compose up db adminer -d
-python3 -m venv ./venv
+python -m venv ./venv
 source venv/bin/activate
 python3 -m pip install -r requirements.txt
 flask db init
@@ -51,5 +51,3 @@ Feel free to contribute to the development of CardDashboard. Create a fork of th
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
-

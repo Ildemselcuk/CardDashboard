@@ -1,34 +1,24 @@
 version: '3.9'
 
-
-
-
 services:
-  # default-app: &default-app
-  #   #image: flaks-volt-test
-  #   build:
-  #     context: "."
-  #     target: "app"
-  #     args:
-  #       - "FLASK_ENV=${FLASK_ENV:-production}"
-  #       - "NODE_ENV=${NODE_ENV:-producßtion}"
-  #   env_file:
-  #     - "production.env"
-  #     - "production_db.env"
-  #   restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
-  #   stop_grace_period: "3s"
-  #   tty: true
-  #   ports:
-  #     - 16880:8000
-    
-
-  
-  # web:
-  #   <<: *default-app
-  #   container_name: flask-web    
-  #   ports:
-  #    - "8001:8000"
-    
+  web:
+    container_name: flask-web    
+    build:
+      context: "."
+      args:
+        - "FLASK_ENV=${FLASK_ENV:-production}"
+        - "NODE_ENV=${NODE_ENV:-production}"
+    env_file:
+      - "production.env"
+      - "production_db.env"
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    stop_grace_period: "3s"
+    tty: true
+    depends_on:
+      - db
+    ports:
+     - "8001:8000"
+ 
     
 
   db:
@@ -53,6 +43,7 @@ services:
       ADMINER_PLUGINS: tables-filter tinymce edit-calendar
     ports:
       - 8081:8080
+    
 
 volumes:
   db_data: {}

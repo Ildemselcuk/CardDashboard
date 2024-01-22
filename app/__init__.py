@@ -1,13 +1,11 @@
-from app.card.models import Card
-from app.transactions.models import Transactions
-from app.user.models import User
 import os
-from importlib import import_module
+
 from flask import Flask
+from flasgger import Swagger
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-from flasgger import Swagger
+from importlib import import_module
 
 from app.exception import handle_generic_error
 
@@ -17,15 +15,11 @@ SWAGGER_TEMPLATE = {"securityDefinitions": {"APIKeyHeader": {
 template = {
     "swagger": "2.0",
     "info": {
-        "title": "XYZ API Docs",
-        "description": "API Documentation for XYZ Application",
+        "title": "Card Dashboard API Docs",
+        "description": "API Documentation for Card Dashboard Application",
         "contact": {
-            "responsibleOrganization": "",
-            "responsibleDeveloper": "",
-            "email": "XYZ@XYZ.com",
-            "url": "XYZ.com",
+            "responsibleOrganization": "https://github.com/Ildemselcuk"
         },
-        "termsOfService": "XYZ .com",
         "version": "1.0"
     },
     "basePath": "/",  # base bash for blueprint registration

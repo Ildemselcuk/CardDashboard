@@ -1,4 +1,6 @@
 import logging
+
+from sqlalchemy import func
 from app.transactions.models import Transactions
 
 
@@ -36,27 +38,47 @@ class ServiceManager:
         self._client = client
         self._logger = logger
 
-   
-
     def report(self):
-        return self._client.transactions.report()
-    
+        try:
+            return self._client.transactions.report()
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while getting  report: {str(e)}")
+            raise  # Re-raise the caught exception
+
     def list(self):
-        filter_ = {
-            Transactions.status.notin_("DELETED"),
-            or_(Card.label.like(func.concat('%', data.get("label", None), '%')),
-                Card.card_no.like(func.concat('%', data.get("card_no", None), '%')))
-        }
-        return self._client.transactions.list()
-    
-    
-    
+        try:
+            filter_ = {
+                Transactions.status.notin_("DELETED"),
+                or_(Card.label.like(func.concat('%', data.get("label", None), '%')),
+                    Card.card_no.like(func.concat('%', data.get("card_no", None), '%')))
+            }
+            return self._client.transactions.list()
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while getting  list: {str(e)}")
+            raise  # Re-raise the caught exception
 
     def create(self, data):
-        self._client.transactions.create(Transactions(**data))
+        try:
+            self._client.transactions.create(Transactions(**data))
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while creating a new transaction: {str(e)}")
+            raise  # Re-raise the caught exception
 
     def update(self):
-        return self._client.transactions.update()
+        try:
+            return self._client.transactions.update()
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while updating transaction information: {str(e)}")
+            raise  # Re-raise the caught exception
 
     def delete(self):
-        return self._client.transactions.delete()
+        try:
+            return self._client.transactions.delete()
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while deleting a transaction process: {str(e)}")
+            raise  # Re-raise the caught exception

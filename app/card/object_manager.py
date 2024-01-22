@@ -108,7 +108,12 @@ class ServiceManager:
         self._logger = logger
 
     def get(self):
-        return self._client.card.get()
+        try:
+            return self._client.card.get()
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while getting data: {str(e)}")
+            raise  # Re-raise the caught exception
 
     def detail_list(self, data):
         try:

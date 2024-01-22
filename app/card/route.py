@@ -1,16 +1,12 @@
 
-from pymysql import IntegrityError
-from app.card.containers import Managers
 import json
 from datetime import datetime
-
-# Blueprint Configuration
-# from . import blueprint
+from pymysql import IntegrityError
+from app.card.containers import Managers
 from flasgger.utils import swag_from
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request
 from app.card.models import CardSchema, DeleteCardSchema, DetailListCardSchema
 from app.user.utils import token_required
-from werkzeug.exceptions import HTTPException
 
 # initialize object manager
 object_manager = Managers.object_manager()

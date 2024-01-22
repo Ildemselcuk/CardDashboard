@@ -12,6 +12,7 @@ from app.card.route import object_manager as card_manager
 # events). Object manager also controls all execution operations.
 #
 
+
 class ObjectManager:
 
     def __init__(self, client):
@@ -39,52 +40,77 @@ class ServiceManager:
         self._client = client
         self._logger = logger
 
-    def login(self,data):
-        login_user = self._client.user.login(data)
-        secret = app.config.config_dict.get("Debug").SECRET_KEY
+    def login(self, data):
+        try:
+            login_user = self._client.user.login(data)
+            secret = app.config.config_dict.get("Debug").SECRET_KEY
 
-        # kullanıcısı sıteme gırınce passive olan son kartını kontrol et ve active cek eger girş ypatgı tarih iel aynı tarihte ise 
-        if login_user:
-            data_={
-                "user_id" : login_user.id,
-                "status" : "PASSIVE",
-                #"date_created":datetime.today().date()
-            }
-            # card_data = card_manager.service.update_card_status(data)
-            
-        token = jwt.encode({
-            'email': data.get('email'),
-            
-            # don't foget to wrap it in str function, otherwise it won't work [ i struggled with this one! ]
-            'expiration': str(datetime.utcnow() + timedelta(seconds=300))
-        },
-            secret, algorithm="HS256")
-        decoded_ = jwt.decode(token, secret, algorithms=["HS256"])
-        return  token
+            # kullanıcısı sıteme gırınce passive olan son kartını kontrol et ve active cek eger girş ypatgı tarih iel aynı tarihte ise
+            if login_user:
+                data_ = {
+                    "user_id": login_user.id,
+                    "status": "PASSIVE",
+                    # "date_created":datetime.today().date()
+                }
+                # card_data = card_manager.service.update_card_status(data)
 
+            token = jwt.encode({
+                'email': data.get('email'),
+
+                # don't foget to wrap it in str function, otherwise it won't work [ i struggled with this one! ]
+                'expiration': str(datetime.utcnow() + timedelta(seconds=300))
+            },
+                secret, algorithm="HS256")
+            decoded_ = jwt.decode(token, secret, algorithms=["HS256"])
+            return token
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while logining user: {str(e)}")
+            raise  # Re-raise the caught exception
 
     def create(self, data):
-        
-        new_user = self._client.user.create(User(**data))
-        if new_user:
-            card_data = {
-                'label': ' initial test card with user id '.join(str(new_user)),
-                'card_no': generate_card_number(),
-                'user_id': new_user,
-                'status': 'PASSIVE',
-                'date_created': data.get("date_created",None),
-                'date_modified': data.get("date_created",None)
-            }
-            card_manager.service.create(card_data)
+        try:
+
+            new_user = self._client.user.create(User(**data))
+            if new_user:
+                card_data = {
+                    'label': ' initial test card with user id '.join(str(new_user)),
+                    'card_no': generate_card_number(),
+                    'user_id': new_user,
+                    'status': 'PASSIVE',
+                    'date_created': data.get("date_created", None),
+                    'date_modified': data.get("date_created", None)
+                }
+                card_manager.service.create(card_data)
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while creating a new user: {str(e)}")
+            raise  # Re-raise the caught exception
 
     def update(self):
-        return self._client.user.update()
+        try:
+            return self._client.user.update()
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while updating a user: {str(e)}")
+            raise  # Re-raise the caught exception
 
-    def delete(self,data):
-        login_user = self._client.user.login(data)
-        if login_user:
-            return self._client.user.delete()
-        return 
+    def delete(self, data):
+        try:
+            login_user = self._client.user.login(data)
+            if login_user:
+                return self._client.user.delete()
+            return
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while deleting a user: {str(e)}")
+            raise  # Re-raise the caught exception
+
 
 def generate_card_number():
-    return ''.join([str(random.randint(0, 9)) for _ in range(16)])
+    try:
+        return ''.join([str(random.randint(0, 9)) for _ in range(16)])
+    except Exception as e:
+        self._logger.error(
+            f"An error occurred while generating a random card number: {str(e)}")
+        raise  # Re-raise the caught exception

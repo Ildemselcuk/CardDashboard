@@ -1,5 +1,4 @@
 from app import db, ma
-from app.user.models import User
 from sqlalchemy import UniqueConstraint
 from datetime import datetime
 from datetime import datetime

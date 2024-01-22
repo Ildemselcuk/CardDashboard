@@ -1,8 +1,6 @@
 import json
-from marshmallow import ValidationError
-from datetime import datetime
 from flasgger.utils import swag_from
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request
 from app.user.containers import Managers
 from app.user.models import LoginSchema, UserSchema
 from app.user.utils import token_required 
@@ -39,6 +37,7 @@ def create():
     except Exception as e:
         raise e
 
+
 @swag_from('swagger/login.yml', methods=['POST'])
 @blueprint.route("/login", methods=['POST'])
 def login():
@@ -54,7 +53,7 @@ def login():
         #kullancı sıstmede kayıtlı son kayıt tarıhı  olanı al ve passıve olanı sec bu sartlara uyan kayıttakı card passivede active cek
         #objects = {'services': login_user}
 
-        return {'token': token},200
+        return {'token': token}, 200
     except Exception as e:
         raise e
 
