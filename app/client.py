@@ -268,6 +268,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from datetime import datetime, timedelta
 import pymysql.err
 
+
 class Client:
 
     def __init__(self):
@@ -285,6 +286,7 @@ class Client:
     @property
     def user(self):
         return UserDbService(client=self)
+
 
 class _BaseDbService:
     def __init__(self, client, model=None):
@@ -304,7 +306,8 @@ class _BaseDbService:
             self.logger.error("Multiple results found!")
             raise multiple_results_err  # Re-raise the MultipleResultsFound exception
         except Exception as err:
-            self.logger.error(f"An error occurred while getting a record: {str(err)}")
+            self.logger.error(
+                f"An error occurred while getting a record: {str(err)}")
             raise err  # Re-raise the general exception
 
     def list(self, filters=[], order_by=[]):
@@ -312,14 +315,16 @@ class _BaseDbService:
             return self._db.session.query(self.model).filter(
                 *filters).order_by(*order_by).all()
         except Exception as err:
-            self.logger.error(f"An error occurred while getting a list of records: {str(err)}")
+            self.logger.error(
+                f"An error occurred while getting a list of records: {str(err)}")
             raise err  # Re-raise the exception
 
     def count(self, columns=[], filters={}):
         try:
             return self._db.session.query(self.model).with_entities(*columns).filter_by(**filters).count()
         except Exception as err:
-            self.logger.error(f"An error occurred while counting records: {str(err)}")
+            self.logger.error(
+                f"An error occurred while counting records: {str(err)}")
             raise err  # Re-raise the exception
 
     def create(self, data):
@@ -336,7 +341,8 @@ class _BaseDbService:
             self._db.session.rollback()
             raise mysql_err  # Re-raise the MySQL-specific error
         except SQLAlchemyError as err:
-            self.logger.error(f"An error occurred while creating a record: {str(err)}")
+            self.logger.error(
+                f"An error occurred while creating a record: {str(err)}")
             self._db.session.rollback()
             raise err  # Re-raise the general SQLAlchemyError
 
@@ -345,7 +351,8 @@ class _BaseDbService:
             setattr(row, column, value)
             self.commit()
         except AttributeError as attribute_err:
-            self.logger.error(f"Attribute error occurred: {str(attribute_err)}")
+            self.logger.error(
+                f"Attribute error occurred: {str(attribute_err)}")
             self._db.session.rollback()
             raise attribute_err  # Re-raise the AttributeError
         except IntegrityError as integrity_err:
@@ -357,7 +364,8 @@ class _BaseDbService:
             self._db.session.rollback()
             raise mysql_err  # Re-raise the MySQL-specific error
         except SQLAlchemyError as err:
-            self.logger.error(f"An error occurred while updating a record: {str(err)}")
+            self.logger.error(
+                f"An error occurred while updating a record: {str(err)}")
             self._db.session.rollback()
             raise err  # Re-raise the general SQLAlchemyError
 
@@ -374,7 +382,8 @@ class _BaseDbService:
             self.logger.error("Multiple results found!")
             raise multiple_results_err  # Re-raise the MultipleResultsFound exception
         except Exception as err:
-            self.logger.error(f"An error occurred while deleting a record: {str(err)}")
+            self.logger.error(
+                f"An error occurred while deleting a record: {str(err)}")
             raise err  # Re-raise the general exception
 
     def commit(self):
@@ -385,7 +394,8 @@ class _BaseDbService:
             self._db.session.rollback()
             raise e  # Re-raise the exception
 
-class CardDbService(Card):
+
+class CardDbService(_BaseDbService):
     def __init__(self):
         self.model = Card
 
@@ -393,7 +403,8 @@ class CardDbService(Card):
         try:
             return self._db.session.query(self.model).with_entities(*columns).filter_by(**filters).count()
         except Exception as err:
-            self.logger.error(f"An error occurred while counting card records: {str(err)}")
+            self.logger.error(
+                f"An error occurred while counting card records: {str(err)}")
             raise err  # Re-raise the exception
 
     def detail_list(self, data, filters=[], order_by=[]):
@@ -406,11 +417,12 @@ class CardDbService(Card):
             order_by = [
                 Card.date_modified.desc()
             ]
-            r_ =super().filter_by_params(params=filters)
+            r_ = super().filter_by_params(params=filters)
             # r_ = self.model.filter_by_params(params=filters)
             return r_
         except Exception as err:
-            self.logger.error(f"An error occurred while getting detailed card list: {str(err)}")
+            self.logger.error(
+                f"An error occurred while getting detailed card list: {str(err)}")
             raise err  # Re-raise the exception
 
     def list(self, filters=[], order_by=[]):
@@ -421,11 +433,11 @@ class CardDbService(Card):
             order_by = [
                 Card.date_modified.desc()
             ]
-            r_ =super().filter_by_params(params=filters, order_by=order_by)
-            #r_ = self.model.filter_by_params(params=filters, order_by=order_by)
+            r_ = self.model.filter_by_params(params=filters, order_by=order_by)
             return r_
         except Exception as err:
-            self.logger.error(f"An error occurred while getting card list: {str(err)}")
+            self.logger.error(
+                f"An error occurred while getting card list: {str(err)}")
             raise err  # Re-raise the exception
 
     def update_card_status(self, data):
@@ -433,7 +445,6 @@ class CardDbService(Card):
             and_(Card.status == data.get("status", None),
                  Card.user_id == data.get("user_id", None))
         ]
-        super().get(params=filters, order_by=order_by)
         card_data = self._client.card.get(filters=cond_)
         if card_data is not None:
             time__ = datetime.now()
@@ -450,19 +461,19 @@ class CardDbService(Card):
             order_by = [
                 Card.date_modified.desc()
             ]
-            cards =  super().count(params=filter_, order_by=order_by)
+            cards = super().count(params=filter_, order_by=order_by)
             cards = self.count(filters=filter_)
             if cards > 1:
-                
-                instance__ = super().filter_by_params_one(params=data,order_by=order_by)
-                # instance__ = self._db.session.query(
-                #     self.model).filter_by(**data).one()
+
+                instance__ = self._db.session.query(
+                    self.model).filter_by(**data).one()
                 instance__.status == "DELETED"
                 self.commit()
                 return instance__
             return
         except Exception as err:
-            self.logger.error(f"An error occurred while deleting card: {str(err)}")
+            self.logger.error(
+                f"An error occurred while deleting card: {str(err)}")
             raise err  # Re-raise the exception
 
     def update(self, data):
@@ -480,8 +491,10 @@ class CardDbService(Card):
             setattr(card_data, Card.date_modified, formatted_time)
             self.commit()
         except Exception as err:
-            self.logger.error(f"An error occurred while updating card: {str(err)}")
+            self.logger.error(
+                f"An error occurred while updating card: {str(err)}")
             raise err  # Re-raise the exception
+
 
 class TransactionDbService(_BaseDbService):
     def __init__(self, client):
@@ -518,8 +531,10 @@ class TransactionDbService(_BaseDbService):
             }
             return result_dict
         except Exception as err:
-            self.logger.error(f"An error occurred while generating a report: {str(err)}")
+            self.logger.error(
+                f"An error occurred while generating a report: {str(err)}")
             raise err  # Re-raise the exception
+
 
 class UserDbService(_BaseDbService):
     def __init__(self, client):
@@ -530,5 +545,6 @@ class UserDbService(_BaseDbService):
         try:
             return self._db.session.query(self.model).filter(and_(self.model.email == data.get("email", None), self.model.password == data.get("password", None))).one()
         except Exception as err:
-            self.logger.error(f"An error occurred while logging in: {str(err)}")
+            self.logger.error(
+                f"An error occurred while logging in: {str(err)}")
             raise err  # Re-raise the exception
