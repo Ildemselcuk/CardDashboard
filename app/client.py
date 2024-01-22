@@ -396,7 +396,8 @@ class _BaseDbService:
 
 
 class CardDbService(_BaseDbService):
-    def __init__(self):
+    def __init__(self, client):
+        super().__init__(client, model=User)
         self.model = Card
 
     def count(self, columns=[], filters={}):
