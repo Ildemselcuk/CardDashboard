@@ -4,6 +4,7 @@ from datetime import datetime
 from flasgger.utils import swag_from
 from flask import Blueprint, jsonify, request
 from app.user.containers import Managers
+from app.user.models import LoginSchema, UserSchema
 from app.user.utils import token_required 
 
 # Start listening events
@@ -21,15 +22,17 @@ blueprint = Blueprint(
 @token_required
 def create():
     try:
-        time__ = datetime.now()
-        formatted_time = time__.strftime("%Y-%m-%d %H:%M:%S")
+        # time__ = datetime.now()
+        # formatted_time = time__.strftime("%Y-%m-%d %H:%M:%S")
 
-        data = {
-            'email': request.json['email'],
-            'password': request.json['password'],
-            'date_created': formatted_time,
-            'date_modified': formatted_time
-        }
+        # data = {
+        #     'email': request.json['email'],
+        #     'password': request.json['password'],
+        #     'date_created': formatted_time,
+        #     'date_modified': formatted_time
+        # }
+        _schema = UserSchema()
+        data = _schema.load(request.json)
         new_user__ = object_manager.service.create(data)
         objects = {'status': "success"}
         return json.dumps(objects, indent=4), 200, {'ContentType': 'application/json'}
@@ -40,10 +43,12 @@ def create():
 @blueprint.route("/login", methods=['POST'])
 def login():
     try:
-        data = {
-            'email': request.json['email'],
-            'password': request.json['password']
-        }
+        # data = {
+        #     'email': request.json['email'],
+        #     'password': request.json['password']
+        # }
+        _schema = LoginSchema()
+        data = _schema.load(request.json)
         token= object_manager.service.login(data)
         #card_manager.service.update(login_user.id)
         #kullancı sıstmede kayıtlı son kayıt tarıhı  olanı al ve passıve olanı sec bu sartlara uyan kayıttakı card passivede active cek

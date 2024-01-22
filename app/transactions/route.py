@@ -4,6 +4,8 @@ from datetime import datetime
 from flask import Blueprint, request
 from flasgger.utils import swag_from
 
+from app.transactions.models import TransactionsSchema
+
 # Start listening events
 object_manager = Managers.object_manager()
 
@@ -37,16 +39,18 @@ def _delete():
 @blueprint.route("/create", methods=['POST'])
 def create():
     try:
-        time__ = datetime.now()
-        formatted_time = time__.strftime("%Y-%m-%d %H:%M:%S")
+        # time__ = datetime.now()
+        # formatted_time = time__.strftime("%Y-%m-%d %H:%M:%S")
 
-        data = {
-            'amount': request.json['amount'],
-            'card_id': request.json['card_id'],
-            'description': request.json['description'],
-            'date_created': formatted_time,
-            'date_modified': formatted_time
-        }
+        # data = {
+        #     'amount': request.json['amount'],
+        #     'card_id': request.json['card_id'],
+        #     'description': request.json['description'],
+        #     'date_created': formatted_time,
+        #     'date_modified': formatted_time
+        # }
+        _schema = TransactionsSchema()
+        data = _schema.load(request.json)
         services = object_manager.service.create(data)
         objects = {'services': services}
         return json.dumps(objects, indent=4), 200, {'ContentType': 'application/json'}

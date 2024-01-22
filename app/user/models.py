@@ -56,13 +56,23 @@ class User(db.Model):
     def count(cls):
         return cls.query.count()
 
-# class UserSchema(ma.SQLAlchemyAutoSchema):
-#     class Meta:
-#         model = User
 
-#     # E-posta geçerliliğini kontrol etmek için özel bir doğrulama
-#     @validates('email')
-#     def validate_email(self, value):
-#         user_with_email = User.query.filter_by(email=value).first()
-#         if user_with_email:
-#             raise ValidationError('Bu e-posta adresi zaten kullanılıyor.')
+class UserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        # Specify the model for SQLAlchemyAutoSchema
+        model = User
+
+    # Custom validation to check the validity of the email
+    @validates('email')
+    def validate_email(self, value):
+        # Check if the email is already associated with a user
+        user_with_email = User.query.filter_by(email=value).first()
+        if user_with_email:
+            # Raise a validation error if the email is already in use
+            raise ValidationError('This email address is already in use.')
+
+
+class LoginSchema(UserSchema):
+    class Meta:
+        # Inherit from CardSchema and include only the 'card_no' field
+        fields = ('email', 'password',)
