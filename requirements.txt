@@ -12,3 +12,4 @@ marshmallow-sqlalchemy==0.29.0
 flask-marshmallow==0.15.0 
 flasgger==0.9.7.1 
 PyJWT==2.8.0 
+cryptography

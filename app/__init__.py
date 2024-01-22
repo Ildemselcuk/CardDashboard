@@ -6,6 +6,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flasgger import Swagger
 
+from app.exception import handle_generic_error
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 SWAGGER_TEMPLATE = {"securityDefinitions": {"APIKeyHeader": {"type": "apiKey", "name": "x-access-token", "in": "header"}}}
 template = {
@@ -87,6 +89,7 @@ def register_blueprints(app):
 def create_app(config):
     app = Flask(__name__)
     app.config.from_object(config)
+    app.register_error_handler(Exception, handle_generic_error)
     register_blueprints(app)
     register_extensions(app)
     configure_database(app)
