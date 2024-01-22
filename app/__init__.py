@@ -1,3 +1,6 @@
+from app.card.models import Card
+from app.transactions.models import Transactions
+from app.user.models import User
 import os
 from importlib import import_module
 from flask import Flask
@@ -9,7 +12,8 @@ from flasgger import Swagger
 from app.exception import handle_generic_error
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-SWAGGER_TEMPLATE = {"securityDefinitions": {"APIKeyHeader": {"type": "apiKey", "name": "x-access-token", "in": "header"}}}
+SWAGGER_TEMPLATE = {"securityDefinitions": {"APIKeyHeader": {
+    "type": "apiKey", "name": "x-access-token", "in": "header"}}}
 template = {
     "swagger": "2.0",
     "info": {
@@ -31,7 +35,7 @@ template = {
     ],
     "securityDefinitions": {
         "Bearer": {
-            "token":"apiKey",
+            "token": "apiKey",
             "name": "Authorization",
             "in": "header",
             "description": "\
@@ -48,7 +52,7 @@ template = {
 swagger_config = {
     "headers": [
 
-        ],
+    ],
     "specs": [
         {
             "endpoint": 'apispec',
@@ -64,10 +68,11 @@ swagger_config = {
 db = SQLAlchemy()
 migrate = Migrate()
 ma = Marshmallow()
-swagger = Swagger(template=template,config=swagger_config)
+swagger = Swagger(template=template, config=swagger_config)
+
 
 def register_extensions(app):
-    
+
     db.init_app(app)
     ma.init_app(app)
     swagger.init_app(app)
@@ -81,7 +86,7 @@ def configure_database(app):
 
 
 def register_blueprints(app):
-    for module_name in ('card','transactions','user'):
+    for module_name in ('card', 'transactions', 'user'):
         module = import_module('app.{}.route'.format(module_name))
         app.register_blueprint(module.blueprint)
 
@@ -94,7 +99,3 @@ def create_app(config):
     register_extensions(app)
     configure_database(app)
     return app
-
-from app.card.models import Card 
-from app.user.models import User 
-from app.transactions.models import Transactions 
