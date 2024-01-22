@@ -5,6 +5,7 @@ import datetime
 from app import db, ma
 from app.card.models import Card
 from marshmallow import fields
+from datetime import datetime
 
 
 class Transactions(db.Model):
@@ -13,8 +14,10 @@ class Transactions(db.Model):
     amount = db.Column(db.String(256))
     description = db.Column(db.String(256))
     card_id = db.Column(db.Integer, db.ForeignKey("card.id"), nullable=False)
-    date_created = db.Column(db.DateTime)
-    date_modified = db.Column(db.DateTime)
+    date_created = db.Column(
+        db.DateTime, default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    date_modified = db.Column(db.DateTime, default=datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"), onupdate=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
     def __init__(self, amount, description, card_id, date_created=None, date_modified=None):
         self.amount = amount

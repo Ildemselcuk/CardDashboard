@@ -1,13 +1,17 @@
 from app import db, ma
 from marshmallow import fields, ValidationError, validates
+from datetime import datetime
+
 
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, index=True)
     password = db.Column(db.String(100))
-    date_created = db.Column(db.DateTime)
-    date_modified = db.Column(db.DateTime)
+    date_created = db.Column(
+        db.DateTime, default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    date_modified = db.Column(db.DateTime, default=datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"), onupdate=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
     def __init__(self, email, password, date_created=None, date_modified=None):
         self.title = email
@@ -51,7 +55,7 @@ class User(db.Model):
     @classmethod
     def count(cls):
         return cls.query.count()
-    
+
 # class UserSchema(ma.SQLAlchemyAutoSchema):
 #     class Meta:
 #         model = User

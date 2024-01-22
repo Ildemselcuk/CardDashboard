@@ -1,20 +1,22 @@
 from app import db, ma
 from app.user.models import User
 from sqlalchemy import UniqueConstraint
+from datetime import datetime
+from datetime import datetime
 
 
-
-    
 class Card(db.Model):
     __tablename__ = 'card'
-   
+
     id = db.Column(db.Integer, primary_key=True)
     label = db.Column(db.String(256))
     card_no = db.Column(db.String(256))
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     status = db.Column(db.String(256))
-    date_created = db.Column(db.DateTime)
-    date_modified = db.Column(db.DateTime)
+    date_created = db.Column(
+        db.DateTime, default=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    date_modified = db.Column(db.DateTime, default=datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"), onupdate=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
     __table_args__ = (UniqueConstraint(
         'user_id', 'card_no', name='_user_card_uc'),)
@@ -60,7 +62,7 @@ class Card(db.Model):
                 query = query.filter(column == value)
 
         return query.order_by(*order_by).all()
-    
+
     @classmethod
     def filter_by_params_one(cls, params, order_by):
         query = cls.query
@@ -84,8 +86,6 @@ class Card(db.Model):
         return query.order_by(*order_by).count()
 
 
-
 class CardSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Card
-

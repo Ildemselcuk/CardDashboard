@@ -83,17 +83,19 @@ def _delete():
 @blueprint.route("/create", methods=['POST'])
 def _create():
     try:
-        time__ = datetime.now()
-        formatted_time = time__.strftime("%Y-%m-%d %H:%M:%S")
-        # data'da eksiklik oldu mu hata fırlat
-        data = {
-            'label': request.json['label'],
-            'card_no': request.json['card_no'],
-            'user_id': request.json['user_id'],
-            'status': request.json['status'],
-            'date_created': formatted_time,
-            'date_modified': formatted_time
-        }
+        # time__ = datetime.now()
+        # formatted_time = time__.strftime("%Y-%m-%d %H:%M:%S")
+        # # data'da eksiklik oldu mu hata fırlat
+        # data = {
+        #     'label': str(request.json['label']),
+        #     'card_no': str(request.json['card_no']),
+        #     'user_id': int(request.json['user_id']),
+        #     'status': str(request.json['status']),
+        #     'date_created': formatted_time,
+        #     'date_modified': formatted_time
+        # }
+        card_schema = CardSchema()
+        data = card_schema.load(request.json)
         services = object_manager.service.create(data)
         objects = {'services': services}
         return json.dumps(objects, indent=4), 200, {'ContentType': 'application/json'}
