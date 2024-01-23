@@ -1,0 +1,25 @@
+This is the summary defined in yaml file
+Create Thor license endpoint
+---
+tags:
+  - Card
+security:
+- Bearer: []
+summary: Delete a card
+description: Delete a card by providing the card number
+parameters:
+  - in: path
+    name: card_no
+    required: true
+    schema:
+      type: string
+    description: The card number to be deleted
+responses:
+  '200':
+    description: Card deleted successfully
+  '404':
+    description: Card not found
+
+   
+  
+

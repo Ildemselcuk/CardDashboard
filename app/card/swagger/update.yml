@@ -1,0 +1,79 @@
+This is the summary defined in yaml file
+Create Thor license endpoint
+---
+tags:
+  - Card
+security:
+- Bearer: []
+summary: Update Card
+description: Update a card.
+parameters:
+  - name: card_no
+    in: path
+    required: true
+    description: The card number
+    schema:
+      type: string
+  - in: body
+    name: card
+    description: Card data to update
+    required: true
+    schema:
+      $ref: '#/definitions/CardUpdateInput'
+responses:
+  '200':
+    description: Successful update
+    schema:
+      $ref: '#/definitions/UpdateResponse'
+  '400':
+    description: Bad request
+    schema:
+      $ref: '#/definitions/ErrorResponse'
+  '401':
+    description: Unauthorized
+    schema:
+      $ref: '#/definitions/ErrorResponse'
+  '500':
+    description: Internal Server Error
+    schema:
+      $ref: '#/definitions/ErrorResponse'
+definitions:
+  CardUpdateInput:
+    type: object
+    properties:
+      label:
+        type: string
+      card_no:
+        type: string
+
+  UpdateResponse:
+    type: object
+    properties:
+      cards:
+        type: array
+        items:
+          $ref: '#/definitions/Card'
+    
+  ErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+
+  Card:
+    type: object
+    properties:
+      id:
+        type: integer
+      label:
+        type: string
+      card_no:
+        type: string
+      user_id:
+        type: integer
+      status:
+        type: string
+      date_created:
+        type: string
+      date_modified:
+        type: string

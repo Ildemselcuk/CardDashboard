@@ -2,6 +2,8 @@ from app import db, ma
 from datetime import datetime
 from marshmallow import fields
 from sqlalchemy import UniqueConstraint
+from sqlalchemy import event
+
 
 class Card(db.Model):
     __tablename__ = 'card'
@@ -83,12 +85,15 @@ class Card(db.Model):
 
         return query.order_by(*order_by).count()
 
-
+@event.listens_for(Card, 'before_update')
+def before_update(mapper, connection, target):
+    target.date_modified = datetime.now()
+    
 class CardSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         # Define the CardSchema class that automatically maps to the Card model
         model = Card
-
+    user_id = fields.Integer()
 
 class DeleteCardSchema(CardSchema):
     class Meta:

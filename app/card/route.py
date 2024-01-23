@@ -18,8 +18,8 @@ blueprint = Blueprint(
 )
 
 
-@swag_from('swagger/list.yml', methods=['GET'])
 @blueprint.route("/list", methods=['GET'])
+@swag_from('/app/card/swagger/list.yml', methods=['GET'])
 @token_required
 def _list():
     try:
@@ -31,8 +31,8 @@ def _list():
         raise e
 
 
-@swag_from('swagger/detail_list.yml', methods=['GET'])
 @blueprint.route("/detail_list", methods=['GET'])
+@swag_from('/app/card/swagger/detail_list.yml', methods=['GET'])
 @token_required
 def _detail_list():
     try:
@@ -43,47 +43,42 @@ def _detail_list():
         objects = {'cards': cards}
         return json.dumps(objects, indent=4), 200, {'ContentType': 'application/json'}
     except Exception as e:
-        print(e)
+        raise e
 
 
-@blueprint.route("/update", methods=['GET'])
+@blueprint.route("/update/<card_no>", methods=['PUT'])
+@swag_from('/app/card/swagger/update.yml', methods=['PUT'])
 @token_required
-def _update():
+def _update(card_no):
     try:
-        # data = {
-        #     'id': request.json['id'],
-        #     'label': request.json['label'],
-        #     'card_no': request.json['card_no'],
-        #     'user_id': request.json['user_id'],
-        #     'status': request.json['status'],
-        # }
         card_schema = CardSchema()
         data = card_schema.load(request.json)
-        services = object_manager.service.update(data)
-        objects = {'cards': services}
-        return json.dumps(objects, indent=4), 200, {'ContentType': 'application/json'}
+        current = {
+            "user_id": session.get("current_user", {}).get("user_id", None),
+            "card_no": card_no
+        }
+        services = object_manager.service.update(data, current)
+        return json.dumps({'updated': services}, indent=4), 200, {'ContentType': 'application/json'}
     except Exception as e:
-        print(e)
+        raise e
 
 
-@blueprint.route("/delete", methods=['GET'])
+@blueprint.route("/delete/<card_no>", methods=['DELETE'])
+@swag_from('/app/card/swagger/delete.yml', methods=['DELETE'])
 @token_required
-def _delete():
+def _delete(card_no):
     try:
-        # data = {
-        #     'card_no': request.json['card_no']
-        # }
         _schema = DeleteCardSchema()
-        data = _schema.load(request.json)
+        data = _schema.load({"card_no": card_no})
         res = object_manager.service.delete(data)
-        objects = {'result': res}
+        objects = {'result': "success"}
         return json.dumps(objects, indent=4), 200, {'ContentType': 'application/json'}
     except Exception as e:
-        print(e)
+        raise e
 
 
-@swag_from('swagger/create.yml', methods=['POST'])
 @blueprint.route("/create", methods=['POST'])
+@swag_from('/app/card/swagger/create.yml', methods=['POST'])
 @token_required
 def _create():
     try:

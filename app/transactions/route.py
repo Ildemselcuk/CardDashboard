@@ -16,9 +16,10 @@ blueprint = Blueprint(
     url_prefix='/transaction'
 )
 
-@swag_from('swagger/list.yml', methods=['GET'])
+
 @blueprint.route("/list", methods=['GET'])
 @token_required
+@swag_from('swagger/list.yml', methods=['GET'])
 def _list():
     try:
         return json.dumps(object_manager.service.report(), indent=4), 200, {'ContentType': 'application/json'}
@@ -38,9 +39,10 @@ def _delete():
     except Exception as e:
         raise e
 
-@swag_from('swagger/create.yml', methods=['POST'])
+
 @blueprint.route("/create", methods=['POST'])
 @token_required
+@swag_from('swagger/create.yml', methods=['POST'])
 def create():
     try:
         # time__ = datetime.now()

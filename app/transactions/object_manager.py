@@ -48,11 +48,7 @@ class ServiceManager:
 
     def list(self):
         try:
-            filter_ = {
-                Transactions.status.notin_("DELETED"),
-                or_(Card.label.like(func.concat('%', data.get("label", None), '%')),
-                    Card.card_no.like(func.concat('%', data.get("card_no", None), '%')))
-            }
+           
             return self._client.transactions.list()
         except Exception as e:
             self._logger.error(
