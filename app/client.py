@@ -188,7 +188,7 @@ class CardDbService(_BaseDbService):
             and_(Card.status == data.get("status", None),
                  Card.user_id == data.get("user_id", None))
         ]
-        card_data = self._client.card.get(filters=cond_)
+        card_data = super().get(filters=cond_)
         if card_data is not None:
             time__ = datetime.now()
             formatted_time = time__.strftime("%Y-%m-%d %H:%M:%S")
@@ -249,13 +249,13 @@ class TransactionDbService(_BaseDbService):
             result = (
                 db.session.query(
                     func.count(
-                        case((Card.status == 'ACTIVE', Card.id), else_=None)
+                        case((Card.status == 'ACTIVE', Card.id), else_=0)
                     ).label('active_card_count'),
                     func.sum(
                         case((Card.status == 'ACTIVE', Transactions.amount), else_=0)
                     ).label('active_card_spending'),
                     func.count(
-                        case((Card.status == 'PASSIVE', Card.id), else_=None)
+                        case((Card.status == 'PASSIVE', Card.id), else_=0)
                     ).label('passive_card_count'),
                     func.sum(
                         case(
@@ -263,7 +263,8 @@ class TransactionDbService(_BaseDbService):
                     ).label('passive_card_spending')
                 )
                 .join(Transactions, Transactions.card_id == Card.id)
-                .group_by()
+                .join(User, User.id == Card.user_id)
+                .group_by(User.id)
                 .one()
             )
             result_dict = {
@@ -287,6 +288,7 @@ class UserDbService(_BaseDbService):
     def login(self, data):
         try:
             return self._db.session.query(self.model).filter(and_(self.model.email == data.get("email", None), self.model.password == data.get("password", None))).one()
+        
         except Exception as err:
             self.logger.error(
                 f"An error occurred while logging in: {str(err)}")

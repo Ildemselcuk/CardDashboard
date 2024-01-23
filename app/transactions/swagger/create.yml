@@ -3,6 +3,8 @@ Create Thor license endpoint
 ---
 tags:
   - Transaction
+security:
+- Bearer: []
 parameters:
   - in: body
     name: transaction

@@ -4,7 +4,7 @@ Create Thor license endpoint
 tags:
   - Card
 security:
-- APIKeyHeader: ['x-access-token']
+- Bearer: []
 parameters:
   - in: body
     name: card
@@ -12,20 +12,16 @@ parameters:
       type: object
       required:
         - card_no
-        - user_id
         - status
       properties:
         card_no:
           type: string
-        user_id:
-          type: int
         status:
           type: string
         label:
           type: string
       example:
         card_no: "499058007080103"
-        user_id: 2
         label: "Test Card"
         status: "ACTIVE"
 
@@ -39,8 +35,6 @@ definitions:
         type: string
       card_no:
         type: string
-      user_id:
-        type: int
       status:
         type: string
 responses:

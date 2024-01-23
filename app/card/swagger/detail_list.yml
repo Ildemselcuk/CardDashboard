@@ -1,0 +1,24 @@
+This is the summary defined in yaml file
+---
+tags:
+  - Card
+security:
+- Bearer: [] 
+summary: Get Card Information
+description: Retrieve card information based on card_no and label parameters.
+parameters:
+  - name: card_no
+    in: query
+    description: Card number to filter by.
+    required: false
+    type: string
+  - name: label
+    in: query
+    description: Label to filter by.
+    required: false
+    type: string
+responses:
+  '200':
+    description: Successful response
+  '400':
+    description: Bad request

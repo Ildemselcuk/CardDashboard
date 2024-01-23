@@ -1,9 +1,9 @@
 This is the summary defined in yaml file
-Create Thor license endpoint
 ---
 tags:
   - Card    
-
+security:
+- Bearer: []
 responses:
   200:
     description: Successfully completed hostname and licenses will be returned

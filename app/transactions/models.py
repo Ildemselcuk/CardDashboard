@@ -11,7 +11,7 @@ from datetime import datetime
 class Transactions(db.Model):
     __tablename__ = 'transactions'
     id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.String(256))
+    amount = db.Column(db.Float)
     description = db.Column(db.String(256))
     card_id = db.Column(db.Integer, db.ForeignKey("card.id"), nullable=False)
     date_created = db.Column(
@@ -19,12 +19,12 @@ class Transactions(db.Model):
     date_modified = db.Column(db.DateTime, default=datetime.now().strftime(
         "%Y-%m-%d %H:%M:%S"), onupdate=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
-    def __init__(self, amount, description, card_id, date_created=None, date_modified=None):
-        self.amount = amount
-        self.description = description
-        self.card_id = card_id
-        self.date_created = date_created
-        self.date_modified = date_modified
+    def __init__(self, **kwargs):
+        self.amount = kwargs.get('amount', '')
+        self.description = kwargs.get('description', '')
+        self.card_id = kwargs.get('card_id')
+        self.date_created = kwargs.get('date_created')
+        self.date_modified = kwargs.get('date_modified')
 
     def save(self):
         db.session.add(self)
@@ -67,3 +67,5 @@ class Transactions(db.Model):
 class TransactionsSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Transactions
+    
+    card_id = fields.Integer()

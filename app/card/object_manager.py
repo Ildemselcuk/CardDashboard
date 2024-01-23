@@ -115,6 +115,14 @@ class ServiceManager:
                 f"An error occurred while getting data: {str(e)}")
             raise  # Re-raise the caught exception
 
+    def list(self):
+        try:
+            return self._client.card.list()
+        except Exception as e:
+            self._logger.error(
+                f"An error occurred while getting detailed list: {str(e)}")
+            raise  # Re-raise the caught exception
+    
     def detail_list(self, data):
         try:
             return self._client.card.detail_list(data)
@@ -125,7 +133,7 @@ class ServiceManager:
 
     def update_card_status(self, data):
         try:
-            return self._client.card.update(data)
+            return self._client.card.update_card_status(data)
         except Exception as e:
             self._logger.error(
                 f"An error occurred while updating card status: {str(e)}")

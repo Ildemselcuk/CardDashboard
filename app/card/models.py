@@ -1,8 +1,7 @@
 from app import db, ma
+from datetime import datetime
+from marshmallow import fields
 from sqlalchemy import UniqueConstraint
-from datetime import datetime
-from datetime import datetime
-
 
 class Card(db.Model):
     __tablename__ = 'card'
@@ -20,13 +19,13 @@ class Card(db.Model):
     __table_args__ = (UniqueConstraint(
         'user_id', 'card_no', name='_user_card_uc'),)
 
-    def __init__(self, label, card_no, user_id, status, date_created=None, date_modified=None):
-        self.label = label
-        self.card_no = card_no
-        self.user_id = user_id
-        self.status = status
-        self.date_created = date_created
-        self.date_modified = date_modified
+    def __init__(self, **kwargs):
+        self.label = kwargs.get('label', '')
+        self.card_no = kwargs.get('card_no', '')
+        self.user_id = kwargs.get('user_id', -1)
+        self.status = kwargs.get('status', '')
+        self.date_created = kwargs.get('date_created')
+        self.date_modified = kwargs.get('date_modified')
 
     def save(self):
         db.session.add(self)
@@ -95,8 +94,9 @@ class DeleteCardSchema(CardSchema):
     class Meta:
         # Inherit from CardSchema and include only the 'card_no' field
         fields = ('card_no',)
-    
+
+
 class DetailListCardSchema(CardSchema):
     class Meta:
         # Inherit from CardSchema and include only the 'card_no' field
-        fields = ('label','card_no',)
+        fields = ('label', 'card_no',)

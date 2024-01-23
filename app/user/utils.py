@@ -17,7 +17,8 @@ def token_required(func):
 
         try:
 
-            data = jwt.decode(token, __secret_key)
+            data = jwt.decode(token, __secret_key, algorithms=["HS256"])
+            session["current_user"] = data
         # You can use the JWT errors in exception
         # except jwt.InvalidTokenError:
         #     return 'Invalid token. Please log in again.'

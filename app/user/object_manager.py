@@ -45,23 +45,25 @@ class ServiceManager:
             login_user = self._client.user.login(data)
             secret = app.config.config_dict.get("Debug").SECRET_KEY
 
-            # kullanıcısı sıteme gırınce passive olan son kartını kontrol et ve active cek eger girş ypatgı tarih iel aynı tarihte ise
+            #When the user enters the system, 
+            #check the last card that is passive and pull active 
+            #if it is on the same date as the date of entry            
             if login_user:
                 data_ = {
                     "user_id": login_user.id,
                     "status": "PASSIVE",
                     # "date_created":datetime.today().date()
                 }
-                # card_data = card_manager.service.update_card_status(data)
+                card_manager.service.update_card_status(data_)
 
             token = jwt.encode({
                 'email': data.get('email'),
-
+                'user_id': login_user.id,
                 # don't foget to wrap it in str function, otherwise it won't work [ i struggled with this one! ]
                 'expiration': str(datetime.utcnow() + timedelta(seconds=300))
             },
                 secret, algorithm="HS256")
-            decoded_ = jwt.decode(token, secret, algorithms=["HS256"])
+            
             return token
         except Exception as e:
             self._logger.error(
@@ -70,7 +72,6 @@ class ServiceManager:
 
     def create(self, data):
         try:
-
             new_user = self._client.user.create(User(**data))
             if new_user:
                 card_data = {
