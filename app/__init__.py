@@ -10,8 +10,6 @@ from importlib import import_module
 from app.exception import handle_generic_error
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-SWAGGER_TEMPLATE = {"securityDefinitions": {"APIKeyHeader": {
-    "type": "apiKey", "name": "x-access-token", "in": "header"}}}
 template = {
     "swagger": "2.0",
     "info": {
@@ -28,13 +26,14 @@ template = {
         "https"
     ],
     "securityDefinitions": {
-        "Bearer": {
-            "token": "apiKey",
+         "Bearer": {
+            "type": "apiKey",
             "name": "Authorization",
             "in": "header",
             "description": "\
-            JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""
+        JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""
         }
+        
     },
     "security": [
         {

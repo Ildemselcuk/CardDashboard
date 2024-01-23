@@ -13,11 +13,11 @@ class User(db.Model):
     date_modified = db.Column(db.DateTime, default=datetime.now().strftime(
         "%Y-%m-%d %H:%M:%S"), onupdate=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
-    def __init__(self, email, password, date_created=None, date_modified=None):
-        self.title = email
-        self.estimated_time = password
-        self.date_created = date_created
-        self.date_modified = date_modified
+    def __init__(self, **kwargs):
+        self.email = kwargs.get('email', '')
+        self.password = kwargs.get('password', '')
+        self.date_created = kwargs.get('date_created')
+        self.date_modified = kwargs.get('date_modified')
 
     def save(self):
         db.session.add(self)
@@ -72,7 +72,9 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
             raise ValidationError('This email address is already in use.')
 
 
-class LoginSchema(UserSchema):
+class LoginSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        # Inherit from CardSchema and include only the 'card_no' field
+        # Specify the model for SQLAlchemyAutoSchema
+        model = User
+        # include only the 'email', 'password' field
         fields = ('email', 'password',)

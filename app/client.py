@@ -8,6 +8,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from datetime import datetime, timedelta
 import pymysql.err
+from flask import session
 from . import db
 
 
@@ -38,7 +39,7 @@ class _BaseDbService:
         self._db = db
         self.model = model
 
-    def get(self, filters={}, order_by={Card.date_modified.desc()}):
+    def get(self, filters=[], order_by=[Card.date_modified.desc()]):
         try:
             return self._db.session.query(self.model).filter(*filters).order_by(*order_by).one()
         except NoResultFound as no_result_err:
@@ -52,18 +53,18 @@ class _BaseDbService:
                 f"An error occurred while getting a record: {str(err)}")
             raise err  # Re-raise the general exception
 
-    def list(self, filters=[], order_by=[]):
+    def list(self, filters=[], group_by=[], order_by=[]):
         try:
             return self._db.session.query(self.model).filter(
-                *filters).order_by(*order_by).all()
+                *filters).group_by(*group_by).order_by(*order_by).all()
         except Exception as err:
             self.logger.error(
                 f"An error occurred while getting a list of records: {str(err)}")
             raise err  # Re-raise the exception
 
-    def count(self, columns=[], filters={}):
+    def count(self, filters: dict = {}):
         try:
-            return self._db.session.query(self.model).with_entities(*columns).filter_by(**filters).count()
+            return self._db.session.query(self.model).filter_by(**filters).count()
         except Exception as err:
             self.logger.error(
                 f"An error occurred while counting records: {str(err)}")
@@ -111,12 +112,17 @@ class _BaseDbService:
             self._db.session.rollback()
             raise err  # Re-raise the general SQLAlchemyError
 
+    def one(self, data):
+        return self._db.session.query(
+            self.model).filter_by(**data).one()
+
     def delete(self, data):
         try:
-            instance__ = self._db.session.query(
-                self.model).filter_by(**data).one()
-            instance__.status == "DELETED"
-            self.commit()
+            instance_ = self.one(data)
+            if instance_:
+                db.session.delete(instance_)
+                self.commit()
+
         except NoResultFound as no_result_err:
             self.logger.error("No result found!")
             raise no_result_err  # Re-raise the NoResultFound exception
@@ -153,15 +159,18 @@ class CardDbService(_BaseDbService):
     def detail_list(self, data, filters=[], order_by=[]):
         try:
             filters = {
-                Card.status.notin_("DELETED"),
-                or_(Card.label.like(func.concat('%', data.get("label", None), '%')),
-                    Card.card_no.like(func.concat('%', data.get("card_no", None), '%')))
+                Card.status.notin_(["DELETED"]),
+                Card.user_id == session["current_user"]["user_id"],
+                and_(Card.label.like(func.concat('%', data.get("label", None), '%')),
+                     Card.card_no.like(func.concat('%', data.get("card_no", None), '%')))
             }
+            group_by = [
+                Card.user_id
+            ]
             order_by = [
                 Card.date_modified.desc()
             ]
-            r_ = super().filter_by_params(params=filters)
-            # r_ = self.model.filter_by_params(params=filters)
+            r_ = super().list(filters=filters, order_by=order_by, group_by=group_by)
             return r_
         except Exception as err:
             self.logger.error(
@@ -171,12 +180,16 @@ class CardDbService(_BaseDbService):
     def list(self, filters=[], order_by=[]):
         try:
             filters = [
-                Card.status.notin_(["DELETED"])
+                Card.status.notin_(["DELETED"]),
+                Card.user_id == session["current_user"]["user_id"]
             ]
             order_by = [
                 Card.date_modified.desc()
             ]
-            r_ = self.model.filter_by_params(params=filters, order_by=order_by)
+            group_by = [
+                Card.user_id
+            ]
+            r_ = super().list(filters=filters, order_by=order_by, group_by=group_by)
             return r_
         except Exception as err:
             self.logger.error(
@@ -188,30 +201,30 @@ class CardDbService(_BaseDbService):
             and_(Card.status == data.get("status", None),
                  Card.user_id == data.get("user_id", None))
         ]
-        card_data = self._client.card.get(filters=cond_)
-        if card_data is not None:
-            time__ = datetime.now()
-            formatted_time = time__.strftime("%Y-%m-%d %H:%M:%S")
-            card_data.status = "ACTIVE"
-            card_data.date_modified = formatted_time
-            self._client.card.commit()
+        try:
+            card_data = super().get(filters=cond_)
+            if card_data is not None:
+                time__ = datetime.now()
+                formatted_time = time__.strftime("%Y-%m-%d %H:%M:%S")
+                card_data.status = "ACTIVE"
+                card_data.date_modified = formatted_time
+                self._client.card.commit()
+        except NoResultFound as no_result_err:
+            self.logger.warn('There is no passive card to be updated for you')
 
     def delete(self, data):
         try:
             filter_ = {
-                Card.status.in_("ACTIVE")
+                "status": "ACTIVE",
+                "user_id": session["current_user"]["user_id"]
             }
-            order_by = [
-                Card.date_modified.desc()
-            ]
-            cards = super().count(params=filter_, order_by=order_by)
-            cards = self.count(filters=filter_)
-            if cards > 1:
 
-                instance__ = self._db.session.query(
-                    self.model).filter_by(**data).one()
-                instance__.status == "DELETED"
-                self.commit()
+            cards = super().count(filters=filter_)
+            if cards > 1:
+                data["user_id"] = session["current_user"]["user_id"]
+                instance__ = super().one(data)
+                instance__.status = "DELETED"
+                super().commit()
                 return instance__
             return
         except Exception as err:
@@ -219,20 +232,14 @@ class CardDbService(_BaseDbService):
                 f"An error occurred while deleting card: {str(err)}")
             raise err  # Re-raise the exception
 
-    def update(self, data):
+    def update(self, instance, data: dict):
         try:
-            cond_ = [
-                Card.id == data.get("id", None),
-            ]
 
-            time__ = datetime.now()
-            formatted_time = time__.strftime("%Y-%m-%d %H:%M:%S")
-            card_data = super().get(filters=cond_)
-            del data["id"]
-            for key, value in data.items():
-                setattr(card_data, key, value)
-            setattr(card_data, Card.date_modified, formatted_time)
+            for field_name, value in data.items():
+                if hasattr(instance, field_name):
+                    setattr(instance, field_name, value)
             self.commit()
+            return True
         except Exception as err:
             self.logger.error(
                 f"An error occurred while updating card: {str(err)}")
@@ -249,13 +256,13 @@ class TransactionDbService(_BaseDbService):
             result = (
                 db.session.query(
                     func.count(
-                        case((Card.status == 'ACTIVE', Card.id), else_=None)
+                        case((Card.status == 'ACTIVE', Card.id), else_=0)
                     ).label('active_card_count'),
                     func.sum(
                         case((Card.status == 'ACTIVE', Transactions.amount), else_=0)
                     ).label('active_card_spending'),
                     func.count(
-                        case((Card.status == 'PASSIVE', Card.id), else_=None)
+                        case((Card.status == 'PASSIVE', Card.id), else_=0)
                     ).label('passive_card_count'),
                     func.sum(
                         case(
@@ -263,7 +270,8 @@ class TransactionDbService(_BaseDbService):
                     ).label('passive_card_spending')
                 )
                 .join(Transactions, Transactions.card_id == Card.id)
-                .group_by()
+                .join(User, User.id == Card.user_id)
+                .group_by(User.id)
                 .one()
             )
             result_dict = {
@@ -287,6 +295,7 @@ class UserDbService(_BaseDbService):
     def login(self, data):
         try:
             return self._db.session.query(self.model).filter(and_(self.model.email == data.get("email", None), self.model.password == data.get("password", None))).one()
+
         except Exception as err:
             self.logger.error(
                 f"An error occurred while logging in: {str(err)}")
